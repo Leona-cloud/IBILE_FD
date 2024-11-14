@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ComingBack, TypeOfVisit } from '../entities/visitors.entity';
+import { Type } from 'class-transformer';
 
 export class VisitorsFormDto {
   @IsNotEmpty()
@@ -36,5 +37,6 @@ export class VisitorsFormDto {
 
   @IsDate()
   @IsOptional()
+  @Type(() => Date)
   return_date: Date;
 }
