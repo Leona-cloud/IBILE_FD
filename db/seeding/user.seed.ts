@@ -46,7 +46,7 @@ export async function seedUsers(userRepository: Repository<UserEntity>) {
     {
       first_name: 'Quadri',
       last_name: 'Ibrahim',
-      email: 'quadri.quadri@ibileholdings.com',
+      email: 'quadri.ibrahim@ibileholdings.com',
     },
   ];
 

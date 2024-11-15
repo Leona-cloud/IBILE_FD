@@ -36,17 +36,22 @@ export class VisitorsService {
     await this.visitorsRepository.save(newVisitor);
 
     const staffExists = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.first_name ILIKE :name', {
-        name: `%${options.whom_to_see}%`,
-      })
-      .orWhere('user.last_name ILIKE :name', {
-        name: `%${options.whom_to_see}%`,
-      })
-      .orWhere("CONCAT(user.first_name, ' ', user.last_name) ILIKE :name", {
-        name: `%${options.whom_to_see}%`,
-      })
-      .getOne();
+    .createQueryBuilder('user')
+    .where('user.first_name ILIKE :name', {
+      name: `%${options.whom_to_see}%`,
+    })
+    .orWhere('user.last_name ILIKE :name', {
+      name: `%${options.whom_to_see}%`,
+    })
+    .orWhere("CONCAT(user.first_name, ' ', user.last_name) ILIKE :name", {
+      name: `%${options.whom_to_see}%`,
+    })
+    .orWhere("CONCAT(user.last_name, ' ', user.first_name) ILIKE :name", {
+      name: `%${options.whom_to_see}%`,
+    })
+    .getOne();
+
+    console.log(staffExists.email)
 
     if (!staffExists) {
       throw new NotFoundException('Staff does not exist');
