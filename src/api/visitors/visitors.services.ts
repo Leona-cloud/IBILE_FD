@@ -9,7 +9,7 @@ import { UserEntity } from '../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { VisitorsEntity } from './entities/visitors.entity';
 import { VisitorsFormDto } from './dtos/visitors_form.dto';
-import  Mailjet from 'node-mailjet';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class VisitorsService {
@@ -18,6 +18,7 @@ export class VisitorsService {
     private visitorsRepository: Repository<VisitorsEntity>,
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    private readonly emailService: EmailService,
   ) {}
 
   async visitorsForm(options: VisitorsFormDto) {
@@ -34,11 +35,14 @@ export class VisitorsService {
 
     await this.visitorsRepository.save(newVisitor);
 
-    // Check if staff exists
     const staffExists = await this.userRepository
       .createQueryBuilder('user')
-      .where('user.first_name ILIKE :name', { name: `%${options.whom_to_see}%` })
-      .orWhere('user.last_name ILIKE :name', { name: `%${options.whom_to_see}%` })
+      .where('user.first_name ILIKE :name', {
+        name: `%${options.whom_to_see}%`,
+      })
+      .orWhere('user.last_name ILIKE :name', {
+        name: `%${options.whom_to_see}%`,
+      })
       .orWhere("CONCAT(user.first_name, ' ', user.last_name) ILIKE :name", {
         name: `%${options.whom_to_see}%`,
       })
@@ -48,50 +52,34 @@ export class VisitorsService {
       throw new NotFoundException('Staff does not exist');
     }
 
-    const staffEmail = staffExists.email;
-    const subject = `New Visitor Form Submission: ${newVisitor.visitors_name}`;
-    const emailText = `
-      A new visitor has submitted their form:
-      Name: ${newVisitor.visitors_name}
-      Address: ${newVisitor.visitors_address}
-      Whom to see: ${newVisitor.whom_to_see}
-      Appointment: ${newVisitor.any_appointment ? 'Yes' : 'No'}
-      Type of visit: ${newVisitor.type_of_visit}
-      Purpose: ${newVisitor.purpose_of_visit}
-      Returning: ${newVisitor.are_you_coming_back ? 'Yes' : 'No'}
-      Return date: ${newVisitor.return_date ? newVisitor.return_date : 'N/A'}
-    `;
+    const subject = `Visitor ${options.purpose_of_visit}`;
+    const textContent = `Hello ${options.whom_to_see}, You have a visitor.`;
+    const htmlContent = `
+        <p>Hello,</p>
+        <p>A new visitor has been recorded. Here are the details:</p>
+        <ul>
+          <li><strong>Name:</strong> ${newVisitor.visitors_name}</li>
+          <li><strong>Address:</strong> ${newVisitor.visitors_address}</li>
+          <li><strong>Whom to See:</strong> ${newVisitor.whom_to_see}</li>
+          <li><strong>Any Appointment:</strong> ${
+            newVisitor.any_appointment ? 'Yes' : 'No'
+          }</li>
+          <li><strong>Type of Visit:</strong> ${newVisitor.type_of_visit}</li>
+          <li><strong>Purpose of Visit:</strong> ${newVisitor.purpose_of_visit}</li>
+          <li><strong>Coming Back:</strong> ${newVisitor.are_you_coming_back}</li>
+          <li><strong>Return Date:</strong> ${
+            newVisitor.return_date  || 'N/A'
+          }</li>
+        </ul>
+        <p>Best regards,<br />IBILE FrontDesk</p>
+        `;
 
-    // Initialize Mailjet API connection
-    const mailjet = Mailjet.apiConnect(
-      '1f15edd57f7f6643de3967db22315809',
-      '77fd0778dba7c1ef5238765064ea5df1'
+    await this.emailService.sendMail(
+      staffExists.email,
+      subject,
+      textContent,
+      htmlContent,
     );
-
-    // Send email
-    await mailjet
-      .post('send', { version: 'v3.1' })
-      .request({
-        Messages: [
-          {
-            From: {
-              Email: 'chisom.okafor@ibileholdings.com', // Replace with verified sender email
-              Name: 'Front Desk',
-            },
-            To: [
-              {
-                Email: staffEmail,
-                Name: options.whom_to_see,
-              },
-            ],
-            Subject: subject,
-            TextPart: emailText,
-            HTMLPart: `<p>${emailText.replace(/\n/g, '<br>')}</p>`, // Convert line breaks to <br> for HTML format
-            CustomCampaign: 'SendAPI_campaign',
-            DeduplicateCampaign: true,
-          },
-        ],
-      });
 
     return {
       message: 'Email sent successfully',

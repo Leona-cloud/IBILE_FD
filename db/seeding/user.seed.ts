@@ -43,6 +43,11 @@ export async function seedUsers(userRepository: Repository<UserEntity>) {
       last_name: 'Okafor',
       email: 'chisom.okafor@ibileholdings.com',
     },
+    {
+      first_name: 'Quadri',
+      last_name: 'Ibrahim',
+      email: 'quadri.quadri@ibileholdings.com',
+    },
   ];
 
   await userRepository.save(users);
