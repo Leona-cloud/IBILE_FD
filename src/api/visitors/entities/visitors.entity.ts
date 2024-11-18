@@ -39,12 +39,6 @@ export class VisitorsEntity {
   @Column()
   purpose_of_visit: string;
 
-  @Column()
-  are_you_coming_back: ComingBack;
-
-  @Column()
-  return_date: Date;
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

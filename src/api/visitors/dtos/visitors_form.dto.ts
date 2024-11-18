@@ -31,12 +31,4 @@ export class VisitorsFormDto {
 
   @IsString()
   purpose_of_visit: string;
-
-  @IsEnum(ComingBack)
-  are_you_coming_back: ComingBack;
-
-  @IsDate()
-  @IsOptional()
-  @Type(() => Date)
-  return_date: Date;
 }

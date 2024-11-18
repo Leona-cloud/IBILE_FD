@@ -29,8 +29,6 @@ export class VisitorsService {
       any_appointment: options.any_appointment,
       type_of_visit: options.type_of_visit,
       purpose_of_visit: options.purpose_of_visit,
-      are_you_coming_back: options.are_you_coming_back,
-      return_date: options.return_date,
     });
 
     await this.visitorsRepository.save(newVisitor);
@@ -71,10 +69,6 @@ export class VisitorsService {
           }</li>
           <li><strong>Type of Visit:</strong> ${newVisitor.type_of_visit}</li>
           <li><strong>Purpose of Visit:</strong> ${newVisitor.purpose_of_visit}</li>
-          <li><strong>Coming Back:</strong> ${newVisitor.are_you_coming_back}</li>
-          <li><strong>Return Date:</strong> ${
-            newVisitor.return_date  || 'N/A'
-          }</li>
         </ul>
         <p>Best regards,<br />IBILE FrontDesk</p>
         `;
