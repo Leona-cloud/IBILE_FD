@@ -55,6 +55,8 @@ export class VisitorsService {
       throw new NotFoundException('Staff does not exist');
     }
 
+    console.log(options, 'visitors option')
+
     const subject = `Visitor ${options.purpose_of_visit}`;
     const textContent = `Hello ${options.whom_to_see}, You have a visitor.`;
     const htmlContent = `
